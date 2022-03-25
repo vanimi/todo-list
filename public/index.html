@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>My To-do List</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<!-- add form  // list of cards-->
+
+<body>
+  <v-app id="app">
+    <v-main>
+      <v-app-bar>
+
+        <v-toolbar-title>My To-Do List</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="onPlusButton">
+          <v-icon>mdi-plus</v-icon>
+        </v-btn>
+
+      </v-app-bar>
+
+      <v-card class="mx-auto" max-width="500" v-if="addform">
+        <v-card-title>Add Task</v-card-title>
+        <v-card-subtitle>Fill the form to add a new task to your to-do list
+        </v-card-subtitle>
+        <v-card-text>
+          <v-form>
+            <v-text-field v-model="title" label="Title" required></v-text-field>
+
+            <v-text-field v-model="description" label="Description" required></v-text-field>
+          </v-form>
+        </v-card-text>
+        <!-- button to trigger saving of chosen fruit -->
+        <v-card-actions>
+          <v-btn color="error" large @click="onCancelTask">
+            Cancel
+          </v-btn>
+          <v-btn color="primary" large @click="onSaveTask">
+            Save Task
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+
+      <v-card v-for="todo in todos" class="mx-auto" max-width="500" >
+        <!-- list of todos -->
+        <v-card-title>{{ todo.title }}</v-card-title>
+        <v-card-subtitle>{{ todo.description }}</v-card-subtitle>
+      </v-card>
+    </v-main>
+
+  </v-app>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+
+  <script>
+    // Vue.js app to coordinate collection of chosen fruit and to handle
+    // the 'Save Fruit' button press
+    var app = new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data: {
+        addform: false,
+        description: "",
+        title: "",
+        url: window.location.origin + "/",
+        todos: []
+      },
+      methods: {
+        onPlusButton: function () {
+          this.description = ""
+          this.title = ""
+          this.addform = true
+        },
+        onSaveTask: async function () {
+          const todo = {
+            title: this.title,
+            description: this.description,
+            timestamp: new Date().toISOString()
+
+          }
+          // try posting to the /fruit endpoint to register a new data point
+          try {
+            const response = await fetch(this.url+"todo", {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(todo)
+            });
+            await response.json();
+            this.addform = false
+            //add this todo to the other todos, at the top
+            this.todos.unshift(todo)
+          } catch (error) {
+            // enter your logic for when there is an error (ex. error toast)
+            console.log(error)
+          }
+
+        },
+
+        onCancelTask: function () {
+          //hide form
+          this.addform = false
+        },
+      }
+    })
+  </script>
+</body>
+
+</html>
