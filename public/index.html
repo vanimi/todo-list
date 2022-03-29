@@ -45,10 +45,15 @@
         </v-card-actions>
       </v-card>
 
-      <v-card v-for="todo in todos" class="mx-auto" max-width="500" >
+      <v-card v-for="todo,i in todos" class="mx-auto" max-width="500">
         <!-- list of todos -->
         <v-card-title>{{ todo.title }}</v-card-title>
         <v-card-subtitle>{{ todo.description }}</v-card-subtitle>
+        <v-card-actions>
+          <v-btn outlined @click="onTaskDelete(i)">
+            <v-icon>mdi-trash-can</v-icon>
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-main>
 
@@ -69,6 +74,21 @@
         url: window.location.origin + "/",
         todos: []
       },
+      mounted: async function () {
+        try {
+          const response = await fetch(this.url + "todolist", {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          const obj = await response.json();
+          console.log(obj)
+          this.todos = obj.response.result.docs
+        } catch (error) {
+          // enter your logic for when there is an error (ex. error toast)
+          console.log(error)
+        }
+
+      },
       methods: {
         onPlusButton: function () {
           this.description = ""
@@ -84,15 +104,37 @@
           }
           // try posting to the /fruit endpoint to register a new data point
           try {
-            const response = await fetch(this.url+"todo", {
+            const response = await fetch(this.url + "todo", {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(todo)
             });
-            await response.json();
+            const obj = await response.json();
+            console.log(obj)
             this.addform = false
+            //add id and rev to the todo object
+            todo._id = obj.result.id
+            todo._rev = obj.result.rev
             //add this todo to the other todos, at the top
             this.todos.unshift(todo)
+          } catch (error) {
+            // enter your logic for when there is an error (ex. error toast)
+            console.log(error)
+          }
+
+        },
+        onTaskDelete: async function (i) {
+          console.log("i is ", i)
+          const delTodo = this.todos[i]
+          console.log("deleting ", delTodo)
+          try {
+            const response = await fetch(this.url + "todo", {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(delTodo)
+            });
+            //remove this todo from the other todos
+            this.todos.splice(i,1)
           } catch (error) {
             // enter your logic for when there is an error (ex. error toast)
             console.log(error)

@@ -29,7 +29,7 @@ app.use(bodyParser.json())
 //if it does exist, you don't need to do anything
 
 
-//post /todo
+
 // delete /todo/id
 // get /todolist
 // get /todolist/tag
@@ -39,15 +39,49 @@ app.use(bodyParser.json())
 app.post('/todo', async (req, res) => {
   // build the document to save to Cloudant
   const todo = req.body
-   // Save the document in the database
-  await client.postDocument({
+  // Save the document in the database
+  const response = await client.postDocument({
     db: DBNAME,
     document: todo
+  })
+
+  res.send(response)
+})
+
+app.get('/todolist', async (req, res) => {
+  // get all todos in reverse chrono order
+  const response = await client.postFind({
+    db: DBNAME,
+    selector: {},
+    sort: [{
+      timestamp: 'desc'
+    }],
+    limit: 50
+  })
+  console.log(response)
+  res.send({
+    "ok": true,
+    response: response
+  })
+})
+
+app.delete('/todo', async (req, res) => {
+  // build the document to delete from Cloudant
+  const todo = req.body
+  // Save the document in the database
+  await client.deleteDocument({
+    db: DBNAME,
+    docId: todo._id,
+    rev: todo._rev
   })
 
   res.send({ "ok": true })
 })
 
+
+
+
 // start the webserver
 app.listen(PORT, HOST)
 console.log(`Running on http://${HOST}:${PORT}`)
+
