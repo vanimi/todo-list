@@ -32,6 +32,11 @@
             <v-text-field v-model="title" label="Title" required></v-text-field>
 
             <v-text-field v-model="description" label="Description" required></v-text-field>
+            <v-select
+          :items="tags"
+          label="Tag"
+          v-model="selectedTag"
+        ></v-select>
           </v-form>
         </v-card-text>
         <!-- button to trigger saving of chosen fruit -->
@@ -49,6 +54,7 @@
         <!-- list of todos -->
         <v-card-title>{{ todo.title }}</v-card-title>
         <v-card-subtitle>{{ todo.description }}</v-card-subtitle>
+        <v-card-text><v-chip v-if="todo.tag">{{ todo.tag }}</v-chip></v-card-text>
         <v-card-actions>
           <v-btn outlined @click="onTaskDelete(i)">
             <v-icon>mdi-trash-can</v-icon>
@@ -72,7 +78,9 @@
         description: "",
         title: "",
         url: window.location.origin + "/",
-        todos: []
+        todos: [],
+        tags:["shopping", "work", "home", "urgent"],
+        selectedTag:""
       },
       mounted: async function () {
         try {
@@ -99,7 +107,8 @@
           const todo = {
             title: this.title,
             description: this.description,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            tag: this.selectedTag
 
           }
           // try posting to the /fruit endpoint to register a new data point

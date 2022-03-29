@@ -30,8 +30,6 @@ app.use(bodyParser.json())
 
 
 
-// delete /todo/id
-// get /todolist
 // get /todolist/tag
 
 
