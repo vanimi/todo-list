@@ -77,9 +77,16 @@ app.delete('/todo', async (req, res) => {
 })
 
 
+const main = async function () {
+  //find out if the db exists and if not create it
+  //find out if an index by time exists and if not create it
+  //find out if an index by tag and time exists and if not, create it
 
 
-// start the webserver
-app.listen(PORT, HOST)
-console.log(`Running on http://${HOST}:${PORT}`)
+  // start the webserver
+  app.listen(PORT, HOST)
+  console.log(`Running on http://${HOST}:${PORT}`)
 
+}
+
+main()
