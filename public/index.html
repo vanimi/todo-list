@@ -25,48 +25,51 @@
           <v-icon>mdi-plus</v-icon>
         </v-btn>
       </v-app-bar>
+      <v-container>
 
-      <v-card class="mx-auto" max-width="500" v-if="addform">
-        <v-card-title>Add Task</v-card-title>
-        <v-card-subtitle>Fill the form to add a new task to your to-do list
-        </v-card-subtitle>
-        <v-card-text>
-          <v-form>
-            <v-text-field v-model="title" label="Title" required></v-text-field>
+        <v-card class="mx-auto" max-width="500" v-if="addform">
+          <v-card-title>Add Task</v-card-title>
+          <v-card-subtitle>Fill the form to add a new task to your to-do list
+          </v-card-subtitle>
+          <v-card-text>
+            <v-form>
+              <v-text-field v-model="title" label="Title" required></v-text-field>
+  
+              <v-text-field v-model="description" label="Description" required></v-text-field>
+              <v-select
+            :items="tags"
+            label="Tag"
+            v-model="selectedTag"
+          ></v-select>
+            </v-form>
+          </v-card-text>
+          <!-- button to trigger saving of chosen fruit -->
+          <v-card-actions>
+            <v-btn color="error" large @click="onCancelTask">
+              Cancel
+            </v-btn>
+            <v-btn color="primary" large @click="onSaveTask">
+              Save Task
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+  
+        <!-- the list of to-do postit notes -->
+        <v-card v-for="todo,i in todos" elevation="8" class="mx-auto postit" :color="colorLookup[todo.tag]" max-width="500">
+          <!-- list of todos -->
+          <v-card-title>{{ todo.title }} &nbsp; <v-chip outlined v-if="todo.tag">{{ todo.tag }}</v-chip></v-card-title>
+          <v-card-subtitle>{{ todo.timestamp }}</v-card-subtitle>
+          <v-card-text>
+            {{ todo.description }}
+          </v-card-text>
+          <v-card-actions>
+            <v-btn icon @click="onTaskDelete(i)">
+              <v-icon>mdi-trash-can</v-icon>
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-container>
 
-            <v-text-field v-model="description" label="Description" required></v-text-field>
-            <v-select
-          :items="tags"
-          label="Tag"
-          v-model="selectedTag"
-        ></v-select>
-          </v-form>
-        </v-card-text>
-        <!-- button to trigger saving of chosen fruit -->
-        <v-card-actions>
-          <v-btn color="error" large @click="onCancelTask">
-            Cancel
-          </v-btn>
-          <v-btn color="primary" large @click="onSaveTask">
-            Save Task
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-
-      <!-- the list of to-do postit notes -->
-      <v-card v-for="todo,i in todos" class="mx-auto postit" color="yellow lighten-2" max-width="500">
-        <!-- list of todos -->
-        <v-card-title>{{ todo.title }}</v-card-title>
-        <v-card-subtitle>{{ todo.description }}</v-card-subtitle>
-        <v-card-text>
-          <v-chip outlined v-if="todo.tag">{{ todo.tag }}</v-chip>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn icon @click="onTaskDelete(i)">
-            <v-icon>mdi-trash-can</v-icon>
-          </v-btn>
-        </v-card-actions>
-      </v-card>
     </v-main>
 
   </v-app>
@@ -86,7 +89,14 @@
         url: window.location.origin + "/",
         todos: [],
         tags:["shopping", "work", "home", "urgent"],
-        selectedTag:""
+        selectedTag:"",
+        colorLookup: {
+          "": "yellow lighten-2",
+          "work": "blue lighten-3",
+          "shopping": "green lighten-2",
+          "home": "orange lighten-2",
+          "urgent": "red lighten-2"
+        }
       },
       mounted: async function () {
         try {
