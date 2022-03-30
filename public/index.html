@@ -11,12 +11,13 @@
     .postit {
       margin-top: 15px;
     }
+    [v-cloak] { display: none; }
   </style>
 </head>
 <!-- add form  // list of cards-->
 
 <body>
-  <v-app id="app">
+  <v-app id="app" v-cloak>
     <v-main>
       <v-app-bar dark>
         <v-toolbar-title>My To-Do List</v-toolbar-title>
@@ -26,7 +27,12 @@
         </v-btn>
       </v-app-bar>
       <v-container>
+        <!-- loading animation -->
+        <v-card class="d-flex justify-center mb-6" flat tile >
+          <v-progress-circular v-if="loading" indeterminate></v-progress-circular>
+        </v-card>
 
+        <!-- add form -->
         <v-card class="mx-auto" max-width="500" v-if="addform">
           <v-card-title>Add Task</v-card-title>
           <v-card-subtitle>Fill the form to add a new task to your to-do list
@@ -83,6 +89,7 @@
       el: '#app',
       vuetify: new Vuetify(),
       data: {
+        loading: false,
         addform: false,
         description: "",
         title: "",
@@ -100,13 +107,14 @@
       },
       mounted: async function () {
         try {
+          this.loading = true
           const response = await fetch(this.url + "todolist", {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
           });
           const obj = await response.json();
-          console.log(obj)
           this.todos = obj.response.result.docs
+          this.loading = false
         } catch (error) {
           // enter your logic for when there is an error (ex. error toast)
           console.log(error)
@@ -135,7 +143,6 @@
               body: JSON.stringify(todo)
             });
             const obj = await response.json();
-            console.log(obj)
             this.addform = false
             //add id and rev to the todo object
             todo._id = obj.result.id
@@ -149,9 +156,7 @@
 
         },
         onTaskDelete: async function (i) {
-          console.log("i is ", i)
           const delTodo = this.todos[i]
-          console.log("deleting ", delTodo)
           try {
             const response = await fetch(this.url + "todo", {
               method: 'DELETE',
