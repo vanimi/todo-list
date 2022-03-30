@@ -7,20 +7,23 @@
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <style type="text/css">
+    .postit {
+      margin-top: 15px;
+    }
+  </style>
 </head>
 <!-- add form  // list of cards-->
 
 <body>
   <v-app id="app">
     <v-main>
-      <v-app-bar>
-
+      <v-app-bar dark>
         <v-toolbar-title>My To-Do List</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon @click="onPlusButton">
           <v-icon>mdi-plus</v-icon>
         </v-btn>
-
       </v-app-bar>
 
       <v-card class="mx-auto" max-width="500" v-if="addform">
@@ -50,13 +53,16 @@
         </v-card-actions>
       </v-card>
 
-      <v-card v-for="todo,i in todos" class="mx-auto" max-width="500">
+      <!-- the list of to-do postit notes -->
+      <v-card v-for="todo,i in todos" class="mx-auto postit" color="yellow lighten-2" max-width="500">
         <!-- list of todos -->
         <v-card-title>{{ todo.title }}</v-card-title>
         <v-card-subtitle>{{ todo.description }}</v-card-subtitle>
-        <v-card-text><v-chip v-if="todo.tag">{{ todo.tag }}</v-chip></v-card-text>
+        <v-card-text>
+          <v-chip outlined v-if="todo.tag">{{ todo.tag }}</v-chip>
+        </v-card-text>
         <v-card-actions>
-          <v-btn outlined @click="onTaskDelete(i)">
+          <v-btn icon @click="onTaskDelete(i)">
             <v-icon>mdi-trash-can</v-icon>
           </v-btn>
         </v-card-actions>
@@ -159,5 +165,4 @@
     })
   </script>
 </body>
-
 </html>
