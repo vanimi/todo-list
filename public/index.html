@@ -57,7 +57,7 @@
         <!-- the list of to-do postit notes -->
         <v-card v-for="todo,i in todos" elevation="8" class="mx-auto postit" :color="colorLookup[todo.tag]" max-width="500">
           <!-- list of todos -->
-          <v-card-title>{{ todo.title }} &nbsp; <v-chip outlined v-if="todo.tag">{{ todo.tag }}</v-chip></v-card-title>
+          <v-card-title>{{ todo.title }} &nbsp; <v-chip v-if="todo.tag">{{ todo.tag }}</v-chip></v-card-title>
           <v-card-subtitle>{{ todo.timestamp }}</v-card-subtitle>
           <v-card-text>
             {{ todo.description }}
