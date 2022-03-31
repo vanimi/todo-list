@@ -72,11 +72,77 @@ app.delete('/todo', async (req, res) => {
   res.send({ ok: true })
 })
 
-const main = async function () {
+const populateDb = async function () {
   // find out if the db exists and if not create it
-  // find out if an index by time exists and if not create it
-  // find out if an index by tag and time exists and if not, create it
-  // create sample data
+
+  try {
+    await client.getDatabaseInformation({db:DBNAME})
+    //if you get here the db exists so do nothing
+    console.log("Database exists")
+    return
+  } catch (error) {
+    //if you end up here you need to create the db
+    console.log("Database does not exist. Creating...")
+  }
+  try {
+    await client.putDatabase({db:DBNAME})
+
+    //now create the indexes
+    await client.postIndex({
+      db: DBNAME,
+      ddoc: 'bydate-index',
+      name: 'getTasksByDate',
+      index: {fields:["timestamp"]},
+      type: 'json'
+    })
+
+    await client.postIndex({
+      db: DBNAME,
+      ddoc: 'bytag-index',
+      name: 'getTasksByTag',
+      index: {fields:["tag", "timestamp"]},
+      type: 'json'
+    })
+
+    //now add some sample data
+
+    await client.postDocument({
+      db:DBNAME,
+      document: {
+        title: "Buy Eggs",
+        description: "They need to be Free Range",
+        timestamp: new Date().toISOString(),
+        tag: "shopping"
+      }
+    })
+    await client.postDocument({
+      db:DBNAME,
+      document: {
+        title: "Collect Children From School",
+        description: "Remember there are three of them",
+        timestamp: new Date().toISOString(),
+        tag: "home"
+      }
+    })
+    await client.postDocument({
+      db:DBNAME,
+      document: {
+        title: "Buy Milk",
+        description: "Soya and Oat Milk please",
+        timestamp: new Date().toISOString(),
+        tag: "shopping"
+      }
+    })
+  } catch (error) {
+    console.log("Failed to create database or indexes: ", error)
+    return
+  }
+  
+}
+
+const main = async function () {
+
+  await populateDb()
 
   // start the webserver
   app.listen(PORT, HOST)
