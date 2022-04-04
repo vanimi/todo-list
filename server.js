@@ -53,7 +53,25 @@ app.get('/todolist', async (req, res) => {
   })
   res.send({
     ok: true,
-    response: response
+    response: response.result.docs
+  })
+})
+
+app.get('/todolist/bytag', async (req, res) => {
+  console.log('GET /todolist/bytag')
+  // get all todos by tag in reverse chrono order
+  const tag = req.query.tag
+  const response = await client.postFind({
+    db: DBNAME,
+    selector: {tag:tag},
+    sort: [{
+      timestamp: 'desc'
+    }],
+    limit: 50
+  })
+  res.send({
+    ok: true,
+    response: response.result.docs
   })
 })
 

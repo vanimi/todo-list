@@ -11,7 +11,10 @@
     .postit {
       margin-top: 15px;
     }
-    [v-cloak] { display: none; }
+
+    [v-cloak] {
+      display: none;
+    }
   </style>
 </head>
 <!-- add form  // list of cards-->
@@ -28,9 +31,13 @@
       </v-app-bar>
       <v-container>
         <!-- loading animation -->
-        <v-card class="d-flex justify-center mb-6" flat tile >
+        <v-card class="d-flex justify-center mb-6" flat tile>
           <v-progress-circular v-if="loading" indeterminate></v-progress-circular>
+
+          <!-- Filter dialog-->
         </v-card>
+        <v-sheet class="mx-auto" max-width="500"  v-if="filteringBy">Filtering by <v-chip close @click:close="onFilterReset">{{ filteringBy }}</v-chip>
+        </v-sheet>
 
         <!-- add form -->
         <v-card class="mx-auto" max-width="500" v-if="addform">
@@ -40,13 +47,9 @@
           <v-card-text>
             <v-form>
               <v-text-field v-model="title" label="Title" required></v-text-field>
-  
+
               <v-text-field v-model="description" label="Description" required></v-text-field>
-              <v-select
-            :items="tags"
-            label="Tag"
-            v-model="selectedTag"
-          ></v-select>
+              <v-select :items="tags" label="Tag" v-model="selectedTag"></v-select>
             </v-form>
           </v-card-text>
           <!-- button to trigger saving of chosen fruit -->
@@ -59,11 +62,14 @@
             </v-btn>
           </v-card-actions>
         </v-card>
-  
+
         <!-- the list of to-do postit notes -->
-        <v-card v-for="todo,i in todos" elevation="8" class="mx-auto postit" :color="colorLookup[todo.tag]" max-width="500">
+        <v-card v-for="todo,i in todos" elevation="8" class="mx-auto postit" :color="colorLookup[todo.tag]"
+          max-width="500">
           <!-- list of todos -->
-          <v-card-title>{{ todo.title }} &nbsp; <v-chip v-if="todo.tag">{{ todo.tag }}</v-chip></v-card-title>
+          <v-card-title>{{ todo.title }} &nbsp; <v-chip v-if="todo.tag" @click="onClickTag(todo.tag)">{{ todo.tag }}
+            </v-chip>
+          </v-card-title>
           <v-card-subtitle>{{ todo.timestamp }}</v-card-subtitle>
           <v-card-text>
             {{ todo.description }}
@@ -89,14 +95,15 @@
       el: '#app',
       vuetify: new Vuetify(),
       data: {
+        filteringBy: "",
         loading: false,
         addform: false,
         description: "",
         title: "",
         url: window.location.origin + "/",
         todos: [],
-        tags:["shopping", "work", "home", "urgent"],
-        selectedTag:"",
+        tags: ["shopping", "work", "home", "urgent"],
+        selectedTag: "",
         colorLookup: {
           "": "yellow lighten-2",
           "work": "blue lighten-3",
@@ -106,26 +113,31 @@
         }
       },
       mounted: async function () {
-        try {
-          this.loading = true
-          const response = await fetch(this.url + "todolist", {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-          });
-          const obj = await response.json();
-          this.todos = obj.response.result.docs
-          this.loading = false
-        } catch (error) {
-          // enter your logic for when there is an error (ex. error toast)
-          console.log(error)
-        }
-
+        await this.onFilterReset()
       },
       methods: {
-        onPlusButton: function () {
+        onFilterReset: async function () {
+          try {
+            this.loading = true
+            this.filteringBy = ''
+            const response = await fetch(this.url + "todolist", {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            const obj = await response.json();
+            this.todos = obj.response
+            this.loading = false
+          } catch (error) {
+            // enter your logic for when there is an error (ex. error toast)
+            console.log(error)
+          }
+        },
+        onPlusButton: async function () {
           this.description = ""
           this.title = ""
           this.addform = true
+          await this.onFilterReset()
+
         },
         onSaveTask: async function () {
           const todo = {
@@ -164,7 +176,25 @@
               body: JSON.stringify(delTodo)
             });
             //remove this todo from the other todos
-            this.todos.splice(i,1)
+            this.todos.splice(i, 1)
+          } catch (error) {
+            // enter your logic for when there is an error (ex. error toast)
+            console.log(error)
+          }
+
+        },
+        onClickTag: async function (tag) {
+          try {
+            this.filteringBy = tag
+            const params = new URLSearchParams({ tag: tag })
+            this.loading = true
+            const response = await fetch(this.url + "todolist/bytag?" + params, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            const obj = await response.json();
+            this.todos = obj.response
+            this.loading = false
           } catch (error) {
             // enter your logic for when there is an error (ex. error toast)
             console.log(error)
@@ -180,4 +210,5 @@
     })
   </script>
 </body>
+
 </html>
